@@ -1,0 +1,29 @@
+*******************CONSOLE LOG*******************                  
+Prepared by: TSOXA13 on 08/20/23 20:03:01 UTC                          
+                                                                   
+==========IPL INFO==========                                       
+ IEE254I  20.03.01 IPLINFO DISPLAY 424                             
+  SYSTEM IPLED AT 18.55.49 ON 08/11/2023                           
+  RELEASE z/OS 02.04.00    LICENSE = z/OS                          
+  USED LOAD00 IN SYS0.IPLPARM ON 01580                             
+  ARCHLVL = 2   MTLSHARE = N                                       
+  IEASYM LIST = (00,01)                                            
+  IEASYS LIST = (00) (OP)                                          
+  IODF DEVICE: ORIGINAL(01580) CURRENT(01580)                      
+  IPL DEVICE: ORIGINAL(01770) CURRENT(01770) VOLUME(ZOS0X0)        
+                                                                   
+==========ASM INFO==========                                       
+ IEE200I 20.03.01 DISPLAY ASM 425                                  
+ TYPE     FULL STAT   DEV  DATASET NAME                            
+ PLPA      30%   OK  1511  SYS1.MVS1.PLPA                          
+ COMMON     0%   OK  1511  SYS1.MVS1.COMMON                        
+ LOCAL      0%   OK  1511  SYS1.MVS1.LOCAL1                        
+ LOCAL      0%   OK  1511  SYS1.MVS1.LOCAL2                        
+ LOCAL      0%   OK  1511  SYS1.MVS1.LOCAL3                        
+ LOCAL      0%   OK  151F  SYS1.MVS1.LOCAL4                        
+ PAGEDEL COMMAND IS NOT ACTIVE                                     
+                                                                   
+==========APPC INFO==========                                           
+ ATB122I  20.03.01  APPC DISPLAY 426                                    
+   LOCAL TP'S      INBOUND CONVERSATIONS      OUTBOUND CONVERSATIONS    
+     00000                 00000                      00000             

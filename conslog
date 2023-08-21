@@ -1,0 +1,86 @@
+/*REXX                 ***Console Log***                             */
+/* This exec will build a dataset of desired console displays        */
+/*-------------------------------------------------------------------*/
+/* Ver  Author        Date    Description                            */
+/*-------------------------------------------------------------------*/
+/* 00   Adam Hout     08/23   Original source                        */
+/*-------------------------------------------------------------------*/
+/*                     Begin Exec                                    */
+/*--------------------------------------*/                             
+/*Setup console profile                 */                             
+/*--------------------------------------*/                             
+Address TSO                                  /*Enter TSO environment */
+Call OUTTRAP 'cons.'                                                   
+'CONSPROF'                                   /*Pull console profile  */
+Call OUTTRAP 'OFF'                                                     
+Parse Var cons.1 . cons.1                    /*Save off profile      */
+'CONSPROF SOLDISPLAY(NO) SOLNUM(500)'        /*Update prof for exec  */
+/*--------------------------------------*/                             
+/*Enter MVS console and capture displays*/                             
+/*--------------------------------------*/                             
+'CONSOLE ACTIVATE'                           /*Establish cons session*/
+Address CONSOLE                              /*Switch to MVS console */
+'CART DSP01'                                 /*IPL command token     */
+'DISPLAY IPLINFO'                            /*Pull last IPL         */
+'CART DSP02'                                 /*ASM command token     */
+'DISPLAY ASM'                                /*Pull Aux storage dsp  */
+'CART DSP03'                                 /*APPC cmd token        */
+'DISPLAY APPC,SUM'                           /*Pull APPC summary     */
+gmi = GETMSG('reci.','SOL','DSP01',,30)      /*Extract IPL display   */
+gma = GETMSG('reca.','SOL','DSP02',,30)      /*Extract ASM display   */
+gmp = GETMSG('recp.','SOL','DSP03',,30)      /*Extract APPC display  */
+Address TSO                                  /*Switch back to TSO    */
+'CONSOLE DEACTIVATE'                         /*Turn cosole mode off  */
+/*--------------------------------------*/                             
+/*Log status displays to a PDS dataset  */                             
+/*--------------------------------------*/                             
+dsn = 'ES52.LOG(D'Date(days)'H'Time(hours)')' /*Dataset name         */
+aut = 'Prepared by:' Userid() 'on' date(usa) Time() 'UTC'              
+hdr = '*******************CONSOLE LOG*******************'              
+fpo = Stream(dsn,'C','OPEN WRITE')            /*Open dataset 4 output*/
+ln1 = Lineout(fpo,hdr)                        /*1st header line      */
+ln2 = Lineout(fpo,aut)                        /*Author hdr line      */
+ln3 = Lineout(fpo,' ')                        /*Blank line           */
+stmnam = 'reci.'                              /*Stem name for IPL var*/
+Call postdsp                                  /*Add IPL info to log  */
+stmnam = 'reca.'                              /*Stem name for ASM var*/
+Call postdsp                                  /*Add ASM info to log  */
+stmnam = 'recp.'                              /*APPC compund var     */
+Call postdsp                                  /*Add APPC to log      */
+rtn2 = Stream(fpo,'C','CLOSE')                                         
+/*--------------------------------------*/                             
+/*Cleanup and exit                      */                             
+/*--------------------------------------*/                             
+'CONSPROF' cons.1                             /*Restore cons profile */
+say 'Console log' Userid() || '.' || dsn 'complete'                    
+EXIT 0                                                                 
+/*----------------------Subroutines----------------------------------*/
+postdsp:                                                               
+  /*Post the appropriate header line*/                                 
+  select                                                               
+    when stmnam = 'reci.' then                                         
+    do                                                                 
+      ln4 = Lineout(fpo,'==========IPL INFO==========')                
+      if gmi > 4 then                                                  
+        ln5 = Lineout(fpo,'IPL FAILED WITH RC:' gmi)                   
+    end                                                                
+    when stmnam = 'reca.' then                                         
+    do                                                                 
+      ln6 = Lineout(fpo,'==========ASM INFO==========')                
+      if gma > 4 then                                                  
+        ln7 = Lineout(fpo,'ASM FAILED WITH RC:' gma)                   
+    end                                                                
+    when stmnam = 'recp.' then                                         
+    do                                                                 
+      if gmp > 4 then                                                  
+        ln9 = Lineout(fpo,'APPC FAILED WITH RC:' gmp)                  
+    end                                                                
+  otherwise nop                                                      
+end                                                                  
+/*Post the display content*/                                         
+cnt = Value(stmnam || 0)                    /*Cnt of display lines */
+do idx = 1 to cnt                           /*Post display lines   */
+  x = Lineout(fpo,Value(stmnam || idx))     /*  to the cons log    */
+end                                                                  
+x = Lineout(fpo,' ')                        /*Follow with blank ln */
+return                                                               
